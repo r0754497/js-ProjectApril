@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Formulier</title>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <form id="form" action="">
+                    <h1>Registreer</h1>
+                    <div class="form-group">
+                        <label for="voornaam">Voornaam</label>
+                        <input type="text" id="voornaam" name="voornaam">
+                        <label for="naam">Naam</label>
+                        <input type="text" name="naam" id="naam">
+                    </div>
+                    <div class="form-group">
+                        <label for="gebruiker">Gebruikersnaam</label>
+                        <input type="text" name="gebruiker" id="gebruiker">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email adres</label>
+                        <input type="email" name="email" id="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="wachtwoord">Wachtwoord</label>
+                        <input type="text" name="wachtwoord" id="wachtwoord">
+
+                        <label for="hwachtwoord">Herhaal Wachtwoord</label>
+                        <input type="text" name="hwachtwoord" id="hwachtwoord">
+                    </div>
+                    <div class="form-group">
+                        <label for="adres">Adres</label>
+                        <input type="text" name="adres" id="adres">
+                    </div>
+                    <div class="form-group">
+                        <label for="land">Land</label>
+                        <select class="custom-select" name="land" id="land">
+                            <option value="" selected>Land</option>
+                            <option value="Belgie">België</option>
+                            <option value="Nederland">Nederland</option>
+                            <option value="Duitsland">Duitsland</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="provincie">Provincie</label>
+                        <select class="custom-select" name="provincie" id="provincie">
+                            <option value="" selected>Provincie</option>
+                            <option value="Antwerpen">Antwerpen</option>
+                            <option value="Limburg">Limburg</option>
+                            <option value="West Vlaanderen">West Vlaanderen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="postcode">Postcode</label>
+                        <input type="number" name="postcode" id="postcode">
+                    </div>
+                    <div class="form-group">
+                        <label for="overeenkomst">Accepteer overeenkomst</label>
+                        <input type="checkbox" name="overeenkomst" id="overeenkomst">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="betaling">Betaling</label>
+                        <fieldset id="betaling">
+                            <label for="Overschrijving">Overschrijving</label>
+                            <input type="radio" name="betaling" value="Overschrijving" checked="checked">
+                            <label for="Bank app">Bank app</label>
+                            <input type="radio" name="betaling" value="Bank app">
+                            <label for="Paypal">Paypal</label>
+                            <input type="radio" name="betaling" value="Paypal">
+                        </fieldset>
+                    </div>
+                    <input type="submit">
+                </form>
+            </div>
+            <div class="col-md-auto">
+                <div id="alerts"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Consts voor data
+        const form = document.getElementById('form');
+        const naam = document.getElementById('naam')
+        const voornaam = document.getElementById('voornaam');
+        const gebruiker = document.getElementById('gebruiker');
+        const email = document.getElementById('email');
+        const wachtwoord = document.getElementById('wachtwoord');
+        const hwachtwoord = document.getElementById('hwachtwoord');
+        const adres = document.getElementById('adres');
+        const land = document.getElementById('land');
+        const postcode = document.getElementById('postcode');
+        const overeenkomst = document.getElementById('overeenkomst');
+        // Consts voor errors
+        const successBegin = "<div class='alert alert-success'><h4>Goed gedaan!</h4><p>Aww yeah, je werd geregistreerd.</p>";
+        const betalingBegin = "<div class='alert alert-primary'><h4>Betalingswijze</h4>";
+        const errorBegin = "<div class='alert alert-danger'><h4>Yikes, errors...</h4>";
+        const alertEinde = "</div>"
+        // Const voor alerts
+        const alertsDiv = document.getElementById('alerts');
+
+
+        function checkEmptyField(cel) {
+            if (cel.value == "" || cel.value == null) {
+                return true;
+            }
+        }
+
+        function validateEmail(email) {
+            // https://stackoverflow.com/questions/46155/whats-the-best-way-to-validate-an-email-address-in-javascript
+            return String(email)
+                .toLowerCase()
+                .match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                );
+        }
+
+        function checkPC(postcode) {
+            if (postcode > 999 && postcode < 10000) {
+                return true;
+            }
+            return false;
+        }
+
+        function validatePayment(betaling) {
+            if (betaling == "" || betaling == null) {
+                return false;
+            }
+            return true;
+        }
+
+        function validatieForm(event) {
+            // Stop default refresh on submit
+            // https://stackoverflow.com/questions/19454310/stop-form-refreshing-page-on-submit
+            event.preventDefault();
+            
+            // Betaling radio data
+            const betaling = document.querySelector('input[name="betaling"]:checked').value;
+
+            // Array voor errors
+            let errors = [];
+
+            // Reset Alerts div!
+            alertsDiv.innerHTML = "";
+
+            // Test verplichte cellen
+            let verplichteCellen = [voornaam, naam, wachtwoord, gebruiker, adres, land, provincie];
+            verplichteCellen.forEach(element => {
+                if (checkEmptyField(element)) {
+                    errors.push("<p>het veld " + element.name + " is vereist.</p>")
+                }
+            });
+
+            // Test email
+            if (!validateEmail(email.value)) {
+                errors.push("<p>E-mailadres is niet correct.</p>");
+            }
+
+            // Test wachtwoord
+            if (wachtwoord.value.length < 7 && wachtwoord.value.length > 0) {
+                errors.push("<p>Wachtwoord is te kort.</p>");
+            }
+
+            if (wachtwoord.value != hwachtwoord.value) {
+                errors.push("<p>Wachtwoorden komen niet overeen.</p>")
+            }
+
+            // Test gebruikersnaam
+            let eersteKarakter = gebruiker.value.charAt(0);
+            if (eersteKarakter == '.' || eersteKarakter == '-') {
+                errors.push('<p>Gebruikersnaam mag niet beginnen met . of -</p>');
+            }
+
+            // Test postcode
+            if (!checkPC(postcode.value)) {
+                errors.push('<p>De waarde van postcode moet tussen 1000 en 9999 liggen.</p>');
+            }
+
+            // Test voorwaarden
+            if (overeenkomst.checked == false) {
+                errors.push('<p>Je moet de algemene voorwaarden accepteren.</p>')
+            }
+
+            // Test betalingswijze
+            if (!validatePayment(betaling)) {
+                errors.push('<p>Je moet een betalingswijze selecteren.</p>')
+            }
+
+            // Toon errors
+            if (errors.length > 0) {
+                alertsDiv.innerHTML += errorBegin + errors.join('') + alertEinde;
+                return;
+            }
+
+            // Toon succes
+            alertsDiv.innerHTML += successBegin + alertEinde;
+
+            // Toon betalingswijze
+            alertsDiv.innerHTML += betalingBegin + '<p>Je betalingswijze is ' + betaling + '</p>' + alertEinde;
+        }
+        form.addEventListener('submit', validatieForm);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
